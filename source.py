@@ -220,6 +220,9 @@ def gameLoopMultiplayer():
     foodx = round(random.randrange(20, WIDTH - snake_block) / snake_block) * snake_block
     foody = round(random.randrange(20, HEIGHT - snake_block) / snake_block) * snake_block
 
+    food2x = round(random.randrange(20, WIDTH - snake_block) / snake_block) * snake_block
+    food2y = round(random.randrange(20, HEIGHT - snake_block) / snake_block) * snake_block
+
     while not game_quit:
         while game_over1:
             window.fill(BLACK)
@@ -312,14 +315,25 @@ def gameLoopMultiplayer():
         window.fill(BLACK)
 
         pygame.draw.rect(window, GREEN, [foodx, foody, snake_block, snake_block])
+        pygame.draw.rect(window, RED, [food2x, food2y, snake_block, snake_block])
 
+        # Grow snake
         snake1.snake_list.append([snake1.x, snake1.y])
         snake2.snake_list.append([snake2.x, snake2.y])
 
-        if len(snake1.snake_list) > snake1.snake_length:
-            del snake1.snake_list[0]
-        if len(snake2.snake_list) > snake2.snake_length:
-            del snake2.snake_list[0]
+        while len(snake1.snake_list) > snake1.snake_length:
+            if len(snake1.snake_list) == 1:
+                game_over1 = True
+                break
+            else:
+                del snake1.snake_list[0]
+
+        while len(snake2.snake_list) > snake2.snake_length:
+            if len(snake2.snake_list) == 1:
+                game_over2 = True
+                break
+            else:
+                del snake2.snake_list[0]
 
         for pos in snake1.snake_list[:-1]:
             if pos == [snake1.x, snake1.y] or pos == [snake2.x, snake2.y]:
@@ -345,11 +359,20 @@ def gameLoopMultiplayer():
             foody = round(random.randrange(20, HEIGHT - snake_block) / snake_block) * snake_block
             snake2.snake_length += 1
 
+        if snake1.x == food2x and snake1.y == food2y:
+            food2x = round(random.randrange(20, WIDTH - snake_block) / snake_block) * snake_block
+            food2y = round(random.randrange(20, HEIGHT - snake_block) / snake_block) * snake_block
+            snake1.snake_length -= 1
+
+        if snake2.x == food2x and snake2.y == food2y:
+            food2x = round(random.randrange(20, WIDTH - snake_block) / snake_block) * snake_block
+            food2y = round(random.randrange(20, HEIGHT - snake_block) / snake_block) * snake_block
+            snake2.snake_length -= 1
+
         clock.tick(snake_speed)
 
     pygame.quit()
     quit()
-
 
 # Main menu loop
 def mainMenuLoop():
@@ -376,6 +399,7 @@ def mainMenuLoop():
                         gameLoop('limited_moves')
                     if event.key == pygame.K_3:
                         gameLoopMultiplayer()
+                
 
             manager.process_events(event)
 
