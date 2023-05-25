@@ -14,10 +14,12 @@ PURPLE = (128, 0, 128)
 ORANGE = (255, 165, 0)
 GRAY = (128, 128, 128)
 BLACK = (0, 0, 0)
+AQUA = (0, 255, 255)
+ORANGE = (255, 105, 0)
 
 
-WIDTH, HEIGHT = 800, 800
-win = pygame.display.set_mode((WIDTH, HEIGHT))
+WIDTH, HEIGHT = 1000, 800
+window = pygame.display.set_mode((WIDTH, HEIGHT))
 
 snake_block = 20
 snake_speed = 18
@@ -37,7 +39,7 @@ play_button_multiplayer = pygame_gui.elements.UIButton(relative_rect=pygame.Rect
 
 # Snake classes
 class Snake:
-    def _init_(self, x, y, color):
+    def __init__(self, x, y, color):
         self.x_change = 0
         self.y_change = 0
         self.snake_list = []
@@ -51,11 +53,34 @@ class Snake:
 
     def draw_snake(self):
         for x in self.snake_list:
-            pygame.draw.rect(win, self.color, [x[0], x[1], snake_block, snake_block])
+            #pygame.draw.rect(window, self.color, [x[0], x[1], snake_block, snake_block])
+            pygame.draw.rect(window, self.color, [x[0], x[1], snake_block, snake_block])
+            pygame.draw.rect(window, BLUE, [x[0], x[1], snake_block, snake_block], 2)
+        head = self.snake_list[-1]
+        pygame.draw.circle(window, RED, (head[0] + 5, head[1] + 5), 3)
+        pygame.draw.circle(window, RED, (head[0] + 15, head[1] + 5), 3)
+
+def display_score(score, color):
+    score_text = font_style.render("Score: " + str(score), True, color)
+    # textRect = score_text.get_rect()
+    # textRect.center = (WIDTH // 2, HEIGHT // 2) 
+    window.blit(score_text, [10, 10])
+
+def display_score2(score, color):
+    score_text = font_style.render("Score: " + str(score), True, color)
+    # textRect = score_text.get_rect()
+    # textRect.center = (WIDTH // 2, HEIGHT // 2) 
+    window.blit(score_text, [840, 10])
+
+def display_moves(moves, color):
+    score_text = font_style.render("Moves: " + str(moves), True, color)
+    # textRect = score_text.get_rect()
+    # textRect.center = (WIDTH // 2, HEIGHT // 2) 
+    window.blit(score_text, [820, 10])
 
 def message(msg, color):
     mesg = font_style.render(msg, True, color)
-    win.blit(mesg, [WIDTH // 2, HEIGHT // 2])
+    window.blit(mesg, [WIDTH // 2 - 100, HEIGHT // 2 - 200])
 
 # Let's add some walls
 walls = [[100, 200, 400, 10], [200, 300, 10, 200]]
@@ -64,35 +89,57 @@ walls = [[100, 200, 400, 10], [200, 300, 10, 200]]
 def generate_food_limited(food_number):
     foods = []
     for _ in range(food_number):
-        foodx = round(random.randrange(0, WIDTH - snake_block) / snake_block) * snake_block
-        foody = round(random.randrange(0, HEIGHT - snake_block) / snake_block) * snake_block
+        foodx = round(random.randrange(20, WIDTH - snake_block) / snake_block) * snake_block
+        foody = round(random.randrange(20, HEIGHT - snake_block) / snake_block) * snake_block
         foods.append([foodx, foody])
     return foods
 
 # Draw food for limited moves mode
 def draw_food_limited(foods):
     for food in foods:
-        pygame.draw.rect(win, GREEN, [food[0], food[1], snake_block, snake_block])
+        pygame.draw.rect(window, GREEN, [food[0], food[1], snake_block, snake_block])
 
 # Game loop
 def gameLoop(mode):
     #mode='classic'
     game_over = False
+    game_quit = False
 
-    snake1 = Snake(WIDTH // 4, HEIGHT // 2, YELLOW)
+    snake1 = Snake(WIDTH // 2, HEIGHT // 2, ORANGE)
 
-    foodx = round(random.randrange(0, WIDTH - snake_block) / snake_block) * snake_block
-    foody = round(random.randrange(0, HEIGHT - snake_block) / snake_block) * snake_block
+    foodx = round(random.randrange(20, WIDTH - snake_block) / snake_block) * snake_block
+    foody = round(random.randrange(20, HEIGHT - snake_block) / snake_block) * snake_block
 
     # Limited moves mode
     if mode == 'limited_moves':
         snake1.moves = 50  # Number of moves the snake can make
         foods = generate_food_limited(50)  # Generate 20 food items
+        display_moves(snake1.moves, AQUA)
+        pygame.display.update()
 
-    while not game_over:
+    while not game_quit:
+        while game_over:
+            window.fill(BLACK)
+            game_over_text = font_style.render("Game Over! Press Q-Quit or C-Play Again", True, GREEN)
+            window.blit(game_over_text, [WIDTH / 9, HEIGHT // 2])
+            display_score(snake1.snake_length - 1, RED)
+            pygame.display.update()
+
+            # Check for game quit or play again
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    game_quit = True
+                    game_over = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        game_quit = True
+                        game_over = False
+                    if event.key == pygame.K_c:
+                        mainMenuLoop()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                game_over = True
+                game_quit = True
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
                     snake1.y_change = -snake_block
@@ -122,10 +169,10 @@ def gameLoop(mode):
         snake1.x += snake1.x_change
         snake1.y += snake1.y_change
 
-        win.fill(BLACK)
+        window.fill(BLACK)
 
         if mode == 'classic':
-            pygame.draw.rect(win, GREEN, [foodx, foody, snake_block, snake_block])
+            pygame.draw.rect(window, GREEN, [foodx, foody, snake_block, snake_block])
         elif mode == 'limited_moves':
             draw_food_limited(foods)
 
@@ -139,14 +186,16 @@ def gameLoop(mode):
                 game_over = True
 
         snake1.draw_snake()
-
+        display_score(snake1.snake_length - 1, RED)
+        if mode == 'limited_moves':
+            display_moves(snake1.moves, AQUA)
         pygame.display.update()
 
         # Food consumption
         if mode == 'classic':
             if snake1.x == foodx and snake1.y == foody:
-                foodx = round(random.randrange(0, WIDTH - snake_block) / snake_block) * snake_block
-                foody = round(random.randrange(0, HEIGHT - snake_block) / snake_block) * snake_block
+                foodx = round(random.randrange(20, WIDTH - snake_block) / snake_block) * snake_block
+                foody = round(random.randrange(20, HEIGHT - snake_block) / snake_block) * snake_block
                 snake1.snake_length += 1
         elif mode == 'limited_moves':
             for food in foods:
@@ -166,17 +215,38 @@ def gameLoop(mode):
 # Multiplayer mode game loop
 def gameLoopMultiplayer():
     game_over = False
+    game_quit = False
 
-    snake1 = Snake(WIDTH // 4, HEIGHT // 2, YELLOW)
-    snake2 = Snake(WIDTH // 2, HEIGHT // 2, PURPLE)
+    snake1 = Snake(300, HEIGHT // 2, YELLOW)
+    snake2 = Snake(600, HEIGHT // 2, AQUA)
 
-    foodx = round(random.randrange(0, WIDTH - snake_block) / snake_block) * snake_block
-    foody = round(random.randrange(0, HEIGHT - snake_block) / snake_block) * snake_block
+    foodx = round(random.randrange(20, WIDTH - snake_block) / snake_block) * snake_block
+    foody = round(random.randrange(20, HEIGHT - snake_block) / snake_block) * snake_block
 
-    while not game_over:
+    while not game_quit:
+        while game_over:
+            window.fill(BLACK)
+            game_over_text = font_style.render("Game Over! Press Q-Quit or C-Play Again", True, GREEN)
+            window.blit(game_over_text, [WIDTH / 9, HEIGHT // 2])
+            display_score(snake1.snake_length - 1, YELLOW)
+            display_score2(snake2.snake_length - 1, PURPLE)
+            pygame.display.update()
+
+            # Check for game quit or play again
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    game_quit = True
+                    game_over = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        game_quit = True
+                        game_over = False
+                    if event.key == pygame.K_c:
+                        mainMenuLoop()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                game_over = True
+                game_quit = True
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
                     snake1.y_change = -snake_block
@@ -204,7 +274,9 @@ def gameLoopMultiplayer():
                     snake2.y_change = 0
 
         # Snake boundaries
-        if snake1.x >= WIDTH or snake1.x < 0 or snake1.y >= HEIGHT or snake1.y < 0 or snake2.x >= WIDTH or snake2.x < 0 or snake2.y >= HEIGHT or snake2.y < 0:
+        if snake1.x >= WIDTH or snake1.x < 0 or snake1.y >= HEIGHT or snake1.y < 0:
+            game_over = True
+        if snake2.x >= WIDTH or snake2.x < 0 or snake2.y >= HEIGHT or snake2.y < 0:
             game_over = True
 
         snake1.x += snake1.x_change
@@ -212,9 +284,9 @@ def gameLoopMultiplayer():
         snake2.x += snake2.x_change
         snake2.y += snake2.y_change
 
-        win.fill(BLACK)
+        window.fill(BLACK)
 
-        pygame.draw.rect(win, GREEN, [foodx, foody, snake_block, snake_block])
+        pygame.draw.rect(window, GREEN, [foodx, foody, snake_block, snake_block])
 
         snake1.snake_list.append([snake1.x, snake1.y])
         snake2.snake_list.append([snake2.x, snake2.y])
@@ -233,17 +305,19 @@ def gameLoopMultiplayer():
 
         snake1.draw_snake()
         snake2.draw_snake()
-
+        display_score(snake1.snake_length - 1, YELLOW)
+        display_score2(snake2.snake_length - 1, PURPLE)
         pygame.display.update()
 
         # Food consumption
         if snake1.x == foodx and snake1.y == foody:
-            foodx = round(random.randrange(0, WIDTH - snake_block) / snake_block) * snake_block
-            foody = round(random.randrange(0, HEIGHT - snake_block) / snake_block) * snake_block
+            foodx = round(random.randrange(20, WIDTH - snake_block) / snake_block) * snake_block
+            foody = round(random.randrange(20, HEIGHT - snake_block) / snake_block) * snake_block
             snake1.snake_length += 1
+
         if snake2.x == foodx and snake2.y == foody:
-            foodx = round(random.randrange(0, WIDTH - snake_block) / snake_block) * snake_block
-            foody = round(random.randrange(0, HEIGHT - snake_block) / snake_block) * snake_block
+            foodx = round(random.randrange(20, WIDTH - snake_block) / snake_block) * snake_block
+            foody = round(random.randrange(20, HEIGHT - snake_block) / snake_block) * snake_block
             snake2.snake_length += 1
 
         clock.tick(snake_speed)
@@ -270,11 +344,19 @@ def mainMenuLoop():
                     if event.ui_element == play_button_multiplayer:
                         gameLoopMultiplayer()
 
+            if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_1:
+                        gameLoop('classic')
+                    if event.key == pygame.K_2:
+                        gameLoop('limited_moves')
+                    if event.key == pygame.K_3:
+                        gameLoopMultiplayer()
+
             manager.process_events(event)
 
         manager.update(time_delta)
-        win.fill(BLACK)
-        manager.draw_ui(win)
+        window.fill(BLACK)
+        manager.draw_ui(window)
         pygame.display.update()
 
 mainMenuLoop()
