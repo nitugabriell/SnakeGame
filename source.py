@@ -109,7 +109,7 @@ def gameLoop(mode):
     # Limited moves mode
     if mode == 'limited_moves':
         snake1.moves = 50  # Number of moves the snake can make
-        foods = generate_food_limited(200)  # Generate 20 food items
+        foods = generate_food_limited(200)  # Generate 200 food items
         display_moves(snake1.moves, ORANGE)
         pygame.display.update()
 
