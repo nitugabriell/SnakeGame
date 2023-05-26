@@ -102,7 +102,7 @@ def gameLoop(mode):
     game_over = False
     game_quit = False
 
-    snake1 = Snake(WIDTH // 2, HEIGHT // 2, ORANGE)
+    snake1 = Snake(WIDTH // 2, HEIGHT // 2, YELLOW)
 
     foodx = round(random.randrange(20, WIDTH - snake_block) / snake_block) * snake_block
     foody = round(random.randrange(20, HEIGHT - snake_block) / snake_block) * snake_block
@@ -227,7 +227,7 @@ def gameLoopMultiplayer():
     while not game_quit:
         while game_over1:
             window.fill(BLACK)
-            win_text = font_style.render("PURPLE WIN !", True, PURPLE)
+            win_text = font_style.render("PURPLE WINS !", True, PURPLE)
             window.blit(win_text, [WIDTH / 3, HEIGHT // 3])
             game_over_text = font_style.render("Press Q-Quit or C-Play Again", True, GREEN)
             window.blit(game_over_text, [WIDTH / 4, HEIGHT // 2])
@@ -251,7 +251,7 @@ def gameLoopMultiplayer():
 
         while game_over2:
             window.fill(BLACK)
-            win_text = font_style.render("YELLOW WIN !", True, YELLOW)
+            win_text = font_style.render("YELLOW WINS !", True, YELLOW)
             window.blit(win_text, [WIDTH / 3, HEIGHT // 3])
             game_over_text = font_style.render("Press Q-Quit or C-Play Again", True, GREEN)
             window.blit(game_over_text, [WIDTH / 4, HEIGHT // 2])
