@@ -23,7 +23,9 @@ HEIGHT = 800
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 
 snake_block = 20
-snake_speed = 15
+initsnake_speed = 10
+snake_speed1 = 10
+counter = 0
 
 font_style = pygame.font.SysFont(None, 50)
 score_font = pygame.font.SysFont(None, 35)
@@ -51,7 +53,6 @@ class Snake:
         self.x = x
         self.y = y
         self.color = color
-        self.invulnerable = False
         self.start_time = None
         self.moves = 0
 
@@ -99,6 +100,9 @@ def draw_food_limited(foods):
 
 # Game loop
 def gameLoop(mode):
+    global counter
+    global snake_speed1
+    snake_speed1 = initsnake_speed
     game_over = False
     game_quit = False
 
@@ -159,6 +163,13 @@ def gameLoop(mode):
                     if mode == 'limited_moves':
                         snake1.moves -= 1
 
+        if counter % 100 == 0:
+            snake_speed1+=2
+
+        counter +=1
+        if counter == 100:
+            counter = 0
+
         # Snake boundaries
         if snake1.x >= WIDTH or snake1.x < 0 or snake1.y >= HEIGHT or snake1.y < 0:
             game_over = True
@@ -204,7 +215,7 @@ def gameLoop(mode):
         if mode == 'limited_moves' and snake1.moves <= 0:
             game_over = True
 
-        clock.tick(snake_speed)
+        clock.tick(snake_speed1)
 
     pygame.quit()
     quit()
@@ -370,7 +381,7 @@ def gameLoopMultiplayer():
             food2y = round(random.randrange(20, HEIGHT - snake_block) / snake_block) * snake_block
             snake2.snake_length -= 1
 
-        clock.tick(snake_speed)
+        clock.tick(snake_speed1)
 
     pygame.quit()
     quit()
@@ -466,7 +477,9 @@ def gameLoopPortal():
         display_score(snake1.snake_length - 1, RED)
         pygame.display.update()
 
-        clock.tick(snake_speed)
+        clock.tick(snake_speed1)
+        event1 = snake_speed1+10
+        pygame.time.set_timer(event1, 10)
 
     pygame.quit()
     quit()
@@ -595,7 +608,7 @@ def gameLoopSurvival():
         display_score(snake1.snake_length - 1, RED)
         pygame.display.update()
 
-        clock.tick(snake_speed)
+        clock.tick(snake_speed1)
 
     pygame.quit()
     quit()
@@ -604,7 +617,9 @@ def gameLoopSurvival():
 # Main menu loop
 def mainMenuLoop():
     running = True
+    # snake_speed1 = initsnake_speed
     while running:
+        snake_speed1 = initsnake_speed
         time_delta = clock.tick(60)/1000.0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
